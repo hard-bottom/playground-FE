@@ -1,19 +1,58 @@
 import 'package:flutter/material.dart';
-import 'package:playground/models/constants.dart';
-import 'package:playground/pages/floatingPopulationPage.dart';
+import 'package:kakao_flutter_sdk/all.dart';
+import 'package:flutter_kakao_map/flutter_kakao_map.dart';
+import 'package:flutter_kakao_map/kakao_maps_flutter_platform_interface.dart';
+import 'package:playground/pages/Entry.dart';
+//import 'marker.dart';
+//import 'default.dart';
+import 'pages/page.dart';
+import 'pages/place_marker.dart';
+import 'pages/floatingPopulationPage.dart';
 
-void main() => runApp(PlayGroundApp());
+/*final List<AppPage> _allPages = <AppPage>[
+  //DefaultMapPage(),
+  //PlaceMarkerPage(),
+  PlaceMarkerExamplePage(),
+  //RestAPIExamplePage(),
+  //FloatingPopulationPage(),
+];*/
 
-class PlayGroundApp extends StatelessWidget {
-  // This widget is the root of your application.
+class PlayGround extends StatelessWidget {
+  // root of application
+  /*void _pushPage(BuildContext context, AppPage page) {
+    Navigator.of(context).push(MaterialPageRoute<void>(
+        builder: (_) => Scaffold(
+          appBar: AppBar(title: Text(page.title)),
+          body: page,
+        )));
+  }*/
+
+  // Scaffold : 최상단, 중간 영역, 최하단, 떠 있는 버튼(3개) 지원해주는 클래스.
+  // appBar : 최상단 바
+  // body : 중간 영역(메인)
+  // bottomNavigationBar : 하단 바
+  // floatingActionButton : 3개 버튼
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'PlayGround',
-      theme: ThemeData(
-        primarySwatch: myBlack,
-      ),
-      home: FloatingPopulationPage(),
+        title: 'Playground',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+      home: Homepage(),
     );
   }
+}
+
+class Homepage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return EntryPage();
+  }
+}
+
+void main() {
+  KakaoContext.clientId = "946b69cdafd72f5a69c1ad2f82b6a799";
+  runApp(MaterialApp(home: PlayGround()));
 }
