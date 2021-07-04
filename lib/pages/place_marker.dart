@@ -83,9 +83,6 @@ class PlaceMarkerState extends State<PlaceMarker> {
           onDragEnd: (MapPoint position) {
             _onMarkerDragEnd(markerId, position);
           },
-          //markerType: MarkerType.markerTypeBluePin,
-          //markerSelectedType: MarkerSelectedType.markerSelectedTypeRedPin,
-          //showAnimationType: ShowAnimationType.showAnimationTypeDropFromHeaven,
         );
         markers[markerId] = marker;
       });
@@ -148,8 +145,6 @@ class PlaceMarkerState extends State<PlaceMarker> {
         markerId: markerId,
         position: positionList[i],
         infoWindow: InfoWindow(title: markerIdVal, snippet: '*'),
-        //icon: myIcon,
-        //visible: true,
         markerType: MarkerType.markerTypeBluePin,
         markerSelectedType: MarkerSelectedType.markerSelectedTypeRedPin,
         showAnimationType: ShowAnimationType.showAnimationTypeDropFromHeaven,
@@ -221,7 +216,6 @@ class PlaceMarkerState extends State<PlaceMarker> {
                             child: const Text('view All Markers'),
                             onPressed: _allviews,
                           ),
-                          //Tab(icon: new Image.asset("assets/photos/res_icon.png"), text: "resturant"),
                         ],
                       ),
                     ],
