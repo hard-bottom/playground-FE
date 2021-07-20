@@ -5,58 +5,71 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 import 'package:page_transition/page_transition.dart';
 
 import 'package:playground/pages/page.dart';
 import 'package:playground/pages/place_marker.dart';
 
-Future<List<Album>> fetchAlbum() async {
+Future<List<Population>> fetchPopulation() async {
+
+  var currentDt = DateTime.now();
+  var hour = DateFormat("HH").format(currentDt);
+  var dayOfWeek = DateFormat("EEEE").format(currentDt);
+
+  var params = {
+    'day': dayOfWeek.toUpperCase(),
+    'time': hour,
+  };
+
   final response =
-  await http.get(Uri.parse('https://jsonplaceholder.typicode.com/photos'));
+  await http.get(Uri.http('192.168.35.24:8080','/populations', params));
 
   if (response.statusCode == 200) {
     // If the server did return a 200 OK response,
     // then parse the JSON.
-    //return Album.fromJson(jsonDecode(response.body));
-    return compute(parsePhotos, response.body);
+    return compute(parsePopulations, response.body);
   } else {
     // If the server did not return a 200 OK response,
     // then throw an exception.
-    throw Exception('Failed to load album');
+    throw Exception('Failed to load populations');
   }
 }
 
-List<Album> parsePhotos(String responseBody) {
+
+List<Population> parsePopulations(String responseBody) {
   final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
 
-  return parsed.map<Album>((json) => Album.fromJson(json)).toList();
+  print(parsed);
+
+  return parsed.map<Population>((json) => Population.fromJson(json)).toList();
 }
 
-class Album {
-  final int userId;
-  final int id;
-  final String title;
-  final String url;
-  final String thumbnailUrl;
+class Population {
+  final String city;
+  final String district;
+  final String day;
+  final String time;
+  final int count;
 
-  Album({
-    this.userId,
-    this.id,
-    this.title,
-    this.url,
-    this.thumbnailUrl
+  Population({
+    this.city,
+    this.district,
+    this.day,
+    this.time,
+    this.count
   });
 
-  // singleton pattern으로 쓰고싶을때 factory keyword
-  factory Album.fromJson(Map<String, dynamic> json) {
-    return Album(
-      userId: json['userId'] as int,
-      id: json['id'] as int,
-      title: json['title'] as String,
-      url: json['url'] as String,
-      thumbnailUrl: json['thumbnailUrl'] as String,
+  factory Population.fromJson(Map<String, dynamic> json) {
+    return Population(
+      city: json['city'] as String,
+      district: json['district'] as String,
+      day: json['day'] as String,
+      time: json['time'] as String,
+      count: json['count'] as int
     );
   }
+
 }
 
 class FloatingPopulationPage extends AppPage {
@@ -97,8 +110,8 @@ class _JSONGetState extends State<FloatingPopulationPageBody> {
         appBar: AppBar(
           title: Text('Fetch data'),
         ),
-        body: FutureBuilder<List<Album>>(
-          future: fetchAlbum(),
+        body: FutureBuilder<List<Population>>(
+          future: fetchPopulation(),
           builder: (context, snapshot) {
             // 데이터를 정상적으로 받아온 경우 처리되는 곳
             if (snapshot.hasData == false) {
@@ -113,7 +126,7 @@ class _JSONGetState extends State<FloatingPopulationPageBody> {
               );
             } else {
               return snapshot.hasData
-                  ? PhotosList(photos: snapshot.data)
+                  ? PopulationList(populations: snapshot.data)
                   : Center(child: CircularProgressIndicator());
             }
           },
@@ -122,10 +135,10 @@ class _JSONGetState extends State<FloatingPopulationPageBody> {
   }
 }
 
-class PhotosList extends StatelessWidget {
-  final List<Album> photos;
+class PopulationList extends StatelessWidget {
+  final List<Population> populations;
 
-  PhotosList({Key key, this.photos}) : super(key: key);
+  PopulationList({Key key, this.populations}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -136,28 +149,26 @@ class PhotosList extends StatelessWidget {
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
       ),
-      itemCount: photos.length,
+      itemCount: populations.length,
       itemBuilder: (context, index) {
         return GestureDetector(
           onTap: () {
             Navigator.push(
-                context,
-                PageTransition(
-                  type: PageTransitionType.fade,
-                  child: PlaceMarkerPage(),
-                ),
+              context,
+              PageTransition(
+                type: PageTransitionType.fade,
+                child: PlaceMarkerPage(),
+              ),
             );
           },
           child: GridTile(
-            child: FadeInImage(
-              placeholder: AssetImage('assets/placeholder.png'),
-              image: NetworkImage(photos[index].thumbnailUrl),
-              fit: BoxFit.cover,
+            child: Container(
+              color: Colors.blue[(populations[index].count/1000).toInt()]
             ),
             footer: GridTileBar(
               backgroundColor: Colors.black54,
-              title: Text(photos[index].title),
-              subtitle: Text('id: ${photos[index].id}'),
+              title: Text(populations[index].day + ', ' + populations[index].time),
+              subtitle: Text('count: ${populations[index].count}'),
             ),
           ),
         );
