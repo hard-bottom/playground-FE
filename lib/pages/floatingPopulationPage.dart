@@ -28,7 +28,7 @@ Future<List<Population>> fetchPopulation() async {
   if (response.statusCode == 200) {
     // If the server did return a 200 OK response,
     // then parse the JSON.
-    return compute(parsePopulations, response.body);
+    return compute(parsePopulations, utf8.decode(response.bodyBytes));
   } else {
     // If the server did not return a 200 OK response,
     // then throw an exception.
@@ -39,10 +39,39 @@ Future<List<Population>> fetchPopulation() async {
 
 List<Population> parsePopulations(String responseBody) {
   final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
+  if(parsed != null) {
+    dynamic max = parsed.first;
+    parsed.forEach((element) {
+      if(element['count'] > max['count']) {
+        max = element;
+      }
+    });
+    parsed.forEach((element) {
+      element['max'] = max['count'];
+    });
+    //print(parsed);
+  }
 
-  print(parsed);
 
-  return parsed.map<Population>((json) => Population.fromJson(json)).toList();
+  //print(parsed);
+
+  List<Population> popList = parsed.map<Population>((json) => Population.fromJson(json)).toList();
+  /*
+  if(popList != null) {
+    int max = popList.first.count;
+    popList.forEach((element) {
+      if(element.count > max) {
+        max = element.count;
+      }
+    });
+    popList.forEach((element) {
+      element.max = max;
+    });
+  }
+  */
+
+  print(popList);
+  return popList;
 }
 
 class Population {
@@ -51,13 +80,15 @@ class Population {
   final String day;
   final String time;
   final int count;
+  final int max;
 
   Population({
     this.city,
     this.district,
     this.day,
     this.time,
-    this.count
+    this.count,
+    this.max
   });
 
   factory Population.fromJson(Map<String, dynamic> json) {
@@ -66,7 +97,8 @@ class Population {
       district: json['district'] as String,
       day: json['day'] as String,
       time: json['time'] as String,
-      count: json['count'] as int
+      count: json['count'] as int,
+      max: json['max'] as int
     );
   }
 
@@ -163,11 +195,13 @@ class PopulationList extends StatelessWidget {
           },
           child: GridTile(
             child: Container(
-              color: Colors.blue[(populations[index].count/1000).toInt()]
+              color: Colors.blue[(populations[index].count / populations[index].max * 9).toInt()*100],
+              child: Text(populations[index].city + ' ' + populations[index].district),
+              alignment: Alignment.topCenter,
             ),
             footer: GridTileBar(
               backgroundColor: Colors.black54,
-              title: Text(populations[index].day + ', ' + populations[index].time),
+              title: Text(populations[index].day + ', ' + populations[index].time + ' hour'),
               subtitle: Text('count: ${populations[index].count}'),
             ),
           ),
